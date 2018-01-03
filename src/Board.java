@@ -161,9 +161,9 @@ public class Board {
      */
     public int play(Point point, char token) {
         int numChangedTokens = this.makeMove(point, token);
-        if (numChangedTokens == 0) {
+        if (numChangedTokens == -1) {
             // invalid move
-            return 0;
+            return -1;
         }
 
         // update numbers
@@ -182,7 +182,7 @@ public class Board {
      *
      * @param point point to put the token on.
      * @param token token color.
-     * @return number of changed tokens
+     * @return number of changed tokens, -1 for invalid move.
      */
     private int makeMove(Point point, char token) {
         int numChangedTokens = 0;
@@ -191,10 +191,10 @@ public class Board {
         // check for valid move
         if (row < 0 || col < 0 || row >= len || col >= len) {
             System.out.println("Error: point out of bounds of the board");
-            return numChangedTokens;
+            return -1;
         } else if (this.matrix[row][col] != EMPTY) {
             System.out.println("Error: chosen place is not empty");
-            return numChangedTokens;
+            return -1;
         }
 
         // try all possible states
@@ -205,16 +205,51 @@ public class Board {
             row = len - col - 1;
             col = temp;
             // make changes
-            numChangedTokens += rightHorizontalSqaures(row, col, token);
+            numChangedTokens += rightHorizontalSquares(row, col, token);
             numChangedTokens += rightDiagonalSquares(row, col, token);
         }
-        if (numChangedTokens == 0) {
-            // invalid squares
-            return 0;
+        if (numChangedTokens == 0 && !this.isNearOtherToken(row, col)) {
+            return -1;
         }
-        // valid move, place the token
+
+        // place the token
         this.matrix[row][col] = token;
         return numChangedTokens;
+    }
+
+    /**
+     * check if the given point is near other token on the board.
+     *
+     * @param row row number.
+     * @param col column number.
+     * @return true if there is a token near that point, false otherwise.
+     */
+    private boolean isNearOtherToken(int row, int col) {
+        if (col + 1 < len) {    // check 3 cells from right
+            if (this.matrix[row][col + 1] != EMPTY) {
+                return true;
+            } else if (row + 1 < len && this.matrix[row + 1][col + 1] != EMPTY) {
+                return true;
+            } else if (row - 1 >= 0 && this.matrix[row - 1][col + 1] != EMPTY) {
+                return true;
+            }
+        }
+        if (col - 1 >= 0) {    // check 3 cells from left
+            if (this.matrix[row][col - 1] != EMPTY) {
+                return true;
+            } else if (row + 1 < len && this.matrix[row + 1][col - 1] != EMPTY) {
+                return true;
+            } else if (row - 1 >= 0 && this.matrix[row - 1][col - 1] != EMPTY) {
+                return true;
+            }
+        }
+        if (row - 1 >= 0 && this.matrix[row - 1][col] != EMPTY) {  // check upper
+            return true;
+        } else if (row + 1 < len && this.matrix[row + 1][col] != EMPTY) {   // check lower
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -246,7 +281,7 @@ public class Board {
      * @param token token color.
      * @return number of changed tokens.
      */
-    private int rightHorizontalSqaures(int row, int col, char token) {
+    private int rightHorizontalSquares(int row, int col, char token) {
         int numChangedTokens = 0;
         // right -->
         for (int j = col + 1; j < len; ++j) {
@@ -341,7 +376,7 @@ public class Board {
             for (int j = 0; j < len; ++j) {
                 if (this.matrix[i][j] == EMPTY) {   // try putting the token
                     int numChangedTokens = board.play(new Point(i, j), token);
-                    if (numChangedTokens != 0) { // valid move
+                    if (numChangedTokens >= 0) { // valid move
                         states.add(board);
                         board = this.copy();
                     }

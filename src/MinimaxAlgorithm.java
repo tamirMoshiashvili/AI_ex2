@@ -1,6 +1,19 @@
 import java.util.List;
 
+/**
+ * the algorithm class.
+ * implementation of minimax algorithm on board.
+ */
 public class MinimaxAlgorithm {
+
+    /**
+     * apply the minimax algorithm on the given board.
+     *
+     * @param node             board.
+     * @param depth            current depth.
+     * @param maximizingPlayer boolean to tell if it is the maximizing player.
+     * @return value which contains a board after a move and heuristic value.
+     */
     public static Value minimax(Board node, int depth, boolean maximizingPlayer) {
         char winner = node.getWinner();
         if (winner != Board.EMPTY) {   // game over
